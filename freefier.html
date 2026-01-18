@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>smart teacher </title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+    body { background: linear-gradient(135deg, #6a1b9a, #ab47bc); display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .container { width: 600px; height: 700px; background: rgba(255,255,255,0.95); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+    .chat-box { flex-grow: 1; padding: 20px; overflow-y: auto; background: #f9f9f9; }
+    .user-input { display: flex; padding: 15px; border-top: 1px solid #ccc; background: #fff; }
+    .user-input input { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 16px; }
+    .user-input button { padding: 12px 20px; margin-left: 10px; border: none; border-radius: 10px; background: linear-gradient(45deg,#6200ea,#8e24aa); color: white; cursor: pointer; font-size: 16px; }
+    .chat-message { margin: 10px 0; }
+    .user-message { text-align: left; color: #333; }
+    .bot-message { text-align: right; color: #6200ea; }
+    .quiz-button { margin-top: 10px; padding: 10px 15px; border-radius: 10px; border: none; background: #03a9f4; color: white; cursor: pointer; font-size: 16px; }
+    .question { margin: 10px 0; }
+    .question input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="chat-box" id="chat-box">
+        <div class="chat-message bot-message">مرحبًا! أنا مساعدك الدراسي الذكي 🤖. يمكنك طرح أسئلتك أو الضغط على "بدء الاختبار" لتقييم مستواك.</div>
+    </div>
+    <div class="user-input">
+        <input type="text" id="user-message" placeholder="اكتب سؤالك هنا...">
+        <button onclick="sendMessage()">ارسال</button>
+    </div>
+    <button class="quiz-button" onclick="startQuiz()">اضغط للاختبار</button>
+</div>
+
+<script>
+    const chatBox = document.getElementById("chat-box");
+
+    function addMessage(message, isBot=true){
+        const msg = document.createElement("div");
+        msg.classList.add("chat-message");
+        msg.classList.add(isBot ? "bot-message" : "user-message");
+        msg.innerText = message;
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // الردود الذكية المبسطة
+    const responses = {
+        "رياضيات":"الرياضيات رائعة! هل تريد أن نبدأ بأسئلة بسيطة أم صعبة؟",
+        "تاريخ":"التاريخ ممتع! عن أي فترة تريد أن تتحدث؟",
+        "علوم":"العلوم رائعة! هل تبحث عن الفيزياء أم الكيمياء؟",
+        "لغات":"اختر فرنسية ام انجليزية او عربية التي تريد تعلميها ",
+        "مساعدة":"بالطبع انا هنا للمساعدة ",
+		"صعبة":"اذا 'Ax+By+c=' كم ",
+		"0":"احسنت اجابة صحيحة ممتاز ",
+		"بسيطة":"انت ضغيف في مادة الرياضيات عليك الدراسة ",
+		"فرنسية":" شكرا لي اختيارك هذه الخدمة لكننا نتعذر فهيا مازالت غير مدعومة",
+		"انجليزية":" شكرا لي اختيارك هذه الخدمة لكننا نتعذر فهيا مازالت غير مدعومة",
+		"فيزياء ":"شكرا لي اختيارك مادة الفيزياء لكنه مازالة غير مدعومة و شكرا للتفهم ",
+		"تكنولوجيا":" شكرا لي اختيارك هذه الخدمة لكننا نتعذر فهيا مازالت غير مدعومة ",
+		              
+		
+    };
+
+    function sendMessage(){
+        const userMsg = document.getElementById("user-message").value.trim();
+        if(userMsg==="") return;
+        addMessage(userMsg,false);
+        document.getElementById("user-message").value="";
+
+        // الرد بناءً على الكلمات المفتاحية
+        let botResponse = "عذرًا، لم أفهم سؤالك، هل يمكنك التوضيح أكثر؟";
+        for(let key in responses){
+            if(userMsg.includes(key)){
+                botResponse = responses[key];
+                break;
+            }
+        }
+
+        setTimeout(()=>addMessage(botResponse,true),500);
+    }
+
+    // --- الاختبار السريع  ---
+    function startQuiz(){
+        addMessage("حسنًا، سنبدأ الاختبار! 📝",true);
+
+        const quizQuestions = [
+            {q:"السؤال 1: كم عدد 2 + 2؟", type:"number", answer:4},
+            {q:"السؤال 2: ماذا يكون الجواب على 5 * 6؟", type:"number", answer:30},
+            {q:" من البلد الذي لقب بالخضراء ", type:"text", answer:"تونس"}
+        ];
+
+        let score=0;
+        let current=0;
+
+        function askNextQuestion(){
+            if(current >= quizQuestions.length){
+                addMessage(`✅ انتهى الاختبار! النتيجة: ${score}/${quizQuestions.length}`,true);
+                let msg="";
+                if(score===quizQuestions.length) msg="ممتاز! أنت متفوق.";
+                else if(score===quizQuestions.length-1) msg="جيد جدًا، يمكنك تحسين بعض الجوانب.";
+                else if(score===1) msg="حاول مرة أخرى، تحتاج للمزيد من التدريب.";
+                else msg="أنت بحاجة للمزيد من التحسين، حاول مرة أخرى.";
+                addMessage(msg,true);
+                return;
+            }
+
+            const qObj = quizQuestions[current];
+            let answer = prompt(qObj.q); // نستخدم نافذة الإدخال البسيطة
+            if(answer !== null){
+                if(qObj.type==="number"){
+                    if(parseInt(answer) === qObj.answer) score++;
+                }else{
+                    if(answer.trim().toLowerCase() === qObj.answer.toLowerCase()) score++;
+                }
+            }
+            current++;
+            askNextQuestion();
+        }
+
+        askNextQuestion();
+    }
+</script>
+
+</body>
+</html>
