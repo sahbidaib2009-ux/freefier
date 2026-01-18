@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Teacher Pro - المعلم الذكي المطور</title>
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #1fa2ff, #12d8fa, #a6ffcb);
+        --bg-color: #f3f4f6;
+        --chat-bg: #ffffff;
+        --user-msg-bg: #667eea;
+        --bot-msg-bg: #e5e7eb;
+        --text-color: #1f2937;
+        --white: #ffffff;
+        --shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    body { 
+        background: var(--primary-gradient); 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        height: 100vh; 
+        font-size: 16px;
+    }
+
+    /* Glassmorphism Container */
+    .container { 
+        width: 90%; 
+        max-width: 800px; 
+        height: 90vh; 
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(10px);
+        border-radius: 20px; 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        position: relative;
+    }
+
+    /* Header */
+    header {
+        padding: 15px 20px;
+        background: white;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: bold;
+        color: #4a4a4a;
+    }
+
+    .brand span { font-size: 1.5rem; }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+    }
+
+    select {
+        padding: 5px 10px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        outline: none;
+        cursor: pointer;
+        background: #f8f9fa;
+        font-size: 0.9rem;
+    }
+
+    /* Modes Tab */
+    .modes {
+        display: flex;
+        background: #f1f3f5;
+        padding: 5px;
+    }
+    
+    .mode-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: 0.3s;
+        font-weight: 600;
+        color: #666;
+    }
+
+    .mode-btn.active {
+        background: white;
+        color: #764ba2;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Chat Area */
+    .chat-box { 
+        flex-grow: 1; 
+        padding: 20px; 
+        overflow-y: auto; 
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        scroll-behavior: smooth;
+    }
+
+    .chat-message { 
+        max-width: 80%; 
+        padding: 12px 18px; 
+        border-radius: 18px; 
+        line-height: 1.5; 
+        position: relative;
+        animation: fadeIn 0.3s ease;
+        word-wrap: break-word;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Direction specific styling handled by JS classes */
+    .user-message { 
+        align-self: flex-end; /* LTR friendly default, adjusted by flex direction */
+        background: var(--user-msg-bg); 
+        color: var(--white);
+        border-bottom-left-radius: 4px; /* for LTR */
+    }
+    
+    /* RTL adjustments override */
+    [dir="rtl"] .user-message {
+        align-self: flex-end;
+        border-bottom-left-radius: 18px;
+        border-bottom-right-radius: 4px;
+    }
+
+    [dir="ltr"] .user-message {
+        border-bottom-right-radius: 4px;
+        border-bottom-left-radius: 18px;
+    }
+
+    .bot-message { 
+        align-self: flex-start;
+        background: var(--bot-msg-bg); 
+        color: var(--text-color);
+        border-bottom-right-radius: 4px; /* Default LTR */
+    }
+
+    [dir="rtl"] .bot-message {
+        border-bottom-right-radius: 18px;
+        border-bottom-left-radius: 4px;
+    }
+    
+    [dir="ltr"] .bot-message {
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 18px;
+    }
+
+    /* Input Area */
+    .input-area { 
+        padding: 15px; 
+        background: white; 
+        border-top: 1px solid #eee; 
+        display: flex; 
+        gap: 10px;
+        align-items: center;
+    }
+
+    input[type="text"] { 
+        flex: 1; 
+        padding: 15px; 
+        border-radius: 30px; 
+        border: 2px solid #eee; 
+        font-size: 16px; 
+        transition: 0.3s;
+    }
+
+    input[type="text"]:focus {
+        border-color: #764ba2;
+        outline: none;
+    }
+
+    .send-btn { 
+        width: 50px;
+        height: 50px;
+        border: none; 
+        border-radius: 50%; 
+        background: var(--primary-gradient); 
+        color: white; 
+        cursor: pointer; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.2s;
+        font-size: 1.2rem;
+    }
+
+    .send-btn:hover { transform: scale(1.05); }
+    .send-btn:active { transform: scale(0.95); }
+
+    /* Interactive Elements in Chat */
+    .options-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    
+    .option-pill {
+        background: white;
+        border: 1px solid #764ba2;
+        color: #764ba2;
+        padding: 8px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+
+    .option-pill:hover {
+        background: #764ba2;
+        color: white;
+    }
+
+    /* Quiz Styling */
+    .quiz-card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-top: 10px;
+    }
+    
+    .quiz-options button {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f8f9fa;
+        cursor: pointer;
+        text-align: inherit;
+    }
+
+    .quiz-options button:hover {
+        background: #eef2ff;
+        border-color: #667eea;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand">
+            <span>🎓</span>
+            <div id="app-title">المعلم الذكي</div>
+        </div>
+        <div class="controls">
+            <select id="lang-select" onchange="changeLanguage()">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="modes">
+        <button class="mode-btn active" onclick="setMode('chat')" id="tab-chat">دردشة</button>
+        <button class="mode-btn" onclick="setMode('quiz')" id="tab-quiz">اختبار</button>
+        <button class="mode-btn" onclick="setMode('learn')" id="tab-learn">تعلم</button>
+    </div>
+
+    <div class="chat-box" id="chat-box">
+        <!-- Messages will appear here -->
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="اكتب رسالتك هنا..." onkeypress="handleKeyPress(event)">
+        <button class="send-btn" onclick="handleSend()">➤</button>
+    </div>
+</div>
+
+<script>
+    // --- Configuration & Data ---
+    const config = {
+        lang: 'ar',
+        mode: 'chat', // chat, quiz, learn
+    };
+
+    const strings = {
+        ar: {
+            title: "المعلم الذكي",
+            placeholder: "اكتب رسالتك هنا...",
+            tabs: { chat: "دردشة", quiz: "اختبار", learn: "تعلم" },
+            welcome: "مرحبًا! أنا مساعدك الدراسي الذكي 🤖. كيف يمكنني مساعدتك اليوم؟",
+            quizStart: "لنختبر معلوماتك! اختر موضوعاً للبدء:",
+            unknown: "عذرًا، لم أفهم ذلك تماماً. هل يمكنك إعادة الصياغة أو اختيار موضوع من القائمة؟",
+            subjects: ["رياضيات", "تاريخ", "علوم", "لغات"],
+            responses: {
+                "رياضيات": "الرياضيات لغة الكون! 📐 هل تريد دراسة: الجبر، الهندسة، أو الحساب؟",
+                "تاريخ": "التاريخ يروي قصص الماضي. 🏛️ هل أنت مهتم بالتاريخ: القديم، الحديث، أو الإسلامي؟",
+                "علوم": "العلوم تكتشف المجهول! 🔬 هل تفضل: الفيزياء، الكيمياء، أو الأحياء؟",
+                "لغات": "تعلم اللغات يفتح آفاقاً جديدة! 🌍 ما هي اللغة التي تريد تعلمها؟",
+                "مساعدة": "أنا هنا للمساعدة! يمكنك استخدتمي للدراسة أو الاختبار أو الترجمة.",
+                "شكرا": "على الرحب والسعة! 😊",
+            },
+            quizQuestions: [
+                { q: "ما هي عاصمة فرنسا؟", options: ["لندن", "باريس", "برلين", "مدريد"], correct: 1 },
+                { q: "كم يساوي 5 × 6؟", options: ["30", "25", "35", "20"], correct: 0 },
+                { q: "ما هو العنصر الكيميائي للماء؟", options: ["CO2", "H2O", "O2", "NaCl"], correct: 1 },
+                { q: "من هو مؤسس علم الجبر؟", options: ["الخوارزمي", "ابن سينا", "نيوتن", "اينشتاين"], correct: 0 }
+            ],
+            quizResult: {
+                correct: "✅ إجابة صحيحة! أحسنت.",
+                wrong: "❌ إجابة خاطئة. حاول مرة أخرى!",
+                score: "انتهى الاختبار! نتيجتك هي "
+            }
+        },
+        en: {
+            title: "Smart Teacher",
+            placeholder: "Type your message here...",
+            tabs: { chat: "Chat", quiz: "Quiz", learn: "Learn" },
+            welcome: "Hello! I am your smart study assistant 🤖. How can I help you today?",
+            quizStart: "Let's test your knowledge! Choose a topic to start:",
+            unknown: "Sorry, I didn't quite get that. Could you rephrase or choose a topic?",
+            subjects: ["Math", "History", "Science", "Languages"],
+            responses: {
+                "math": "Math is the language of the universe! 📐 Do you want to study: Algebra, Geometry, or Arithmetic?",
+                "history": "History tells stories of the past. 🏛️ Interested in: Ancient, Modern, or Medieval history?",
+                "science": "Science explores the unknown! 🔬 Do you prefer: Physics, Chemistry, or Biology?",
+                "languages": "Learning languages opens new horizons! 🌍 Which language do you want to learn?",
+                "help": "I'm here to help! Use me for studying, quizzes, or translation.",
+                "thanks": "You're welcome! 😊",
+            },
+            quizQuestions: [
+                { q: "What is the capital of France?", options: ["London", "Paris", "Berlin", "Madrid"], correct: 1 },
+                { q: "What is 5 x 6?", options: ["30", "25", "35", "20"], correct: 0 },
+                { q: "What is the chemical formula for water?", options: ["CO2", "H2O", "O2", "NaCl"], correct: 1 },
+                { q: "Who is the father of Algebra?", options: ["Al-Khwarizmi", "Avicenna", "Newton", "Einstein"], correct: 0 }
+            ],
+            quizResult: {
+                correct: "✅ Correct answer! Well done.",
+                wrong: "❌ Wrong answer. Try again!",
+                score: "Quiz finished! Your score is "
+            }
+        },
+        fr: {
+            title: "Professeur Intelligent",
+            placeholder: "Écrivez votre message ici...",
+            tabs: { chat: "Chat", quiz: "Quiz", learn: "Apprendre" },
+            welcome: "Bonjour! Je suis votre assistant d'étude intelligent 🤖. Comment puis-je vous aider aujourd'hui?",
+            quizStart: "Testons vos connaissances! Choisissez un sujet pour commencer:",
+            unknown: "Désolé, je n'ai pas bien compris. Pouvez-vous reformuler ou choisir un sujet?",
+            subjects: ["Maths", "Histoire", "Sciences", "Langues"],
+            responses: {
+                "maths": "Les maths sont le langage de l'univers! 📐 Voulez-vous étudier: Algèbre, Géométrie ou Arithmétique?",
+                "histoire": "L'histoire raconte le passé. 🏛️ Intéressé par: Ancien, Moderne, ou Médiéval?",
+                "sciences": "La science explore l'inconnu! 🔬 Préférez-vous: Physique, Chimie ou Biologie?",
+                "langues": "Apprendre des langues ouvre de nouveaux horizons! 🌍 Quelle langue voulez-vous apprendre?",
+                "aide": "Je suis là pour aider! Utilisez-moi pour étudier, faire des quiz ou traduire.",
+                "merci": "De rien! 😊",
+            },
+            quizQuestions: [
+                { q: "Quelle est la capitale de la France?", options: ["Londres", "Paris", "Berlin", "Madrid"], correct: 1 },
+                { q: "Combien font 5 x 6?", options: ["30", "25", "35", "20"], correct: 0 },
+                { q: "Quelle est la formule chimique de l'eau?", options: ["CO2", "H2O", "O2", "NaCl"], correct: 1 },
+                { q: "Qui est le père de l'Algèbre?", options: ["Al-Khwarizmi", "Avicenne", "Newton", "Einstein"], correct: 0 }
+            ],
+            quizResult: {
+                correct: "✅ Bonne réponse! Bravo.",
+                wrong: "❌ Mauvaise réponse. Réessayez!",
+                score: "Quiz terminé! Votre score est "
+            }
+        }
+    };
+
+    // --- State Management ---
+    let chatHistory = [];
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+
+    // --- Initialization ---
+    window.onload = () => {
+        changeLanguage(); // Initialize UI based on default lang
+    };
+
+    function changeLanguage() {
+        config.lang = document.getElementById("lang-select").value;
+        const ui = strings[config.lang];
+        
+        // Update Static UI
+        document.getElementById("app-title").innerText = ui.title;
+        document.getElementById("user-input").placeholder = ui.placeholder;
+        document.getElementById("tab-chat").innerText = ui.tabs.chat;
+        document.getElementById("tab-quiz").innerText = ui.tabs.quiz;
+        document.getElementById("tab-learn").innerText = ui.tabs.learn;
+
+        // Direction & Font adjustments
+        if (config.lang === 'ar') {
+            document.documentElement.setAttribute('dir', 'rtl');
+            document.body.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            document.querySelectorAll('.send-btn').forEach(btn => btn.style.transform = 'rotate(180deg)');
+        } else {
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.body.style.fontFamily = "'Roboto', sans-serif";
+            document.querySelectorAll('.send-btn').forEach(btn => btn.style.transform = 'rotate(0deg)');
+        }
+
+        // Clear and add welcome message
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML = ''; 
+        addBotMessage(ui.welcome);
+        
+        // Add quick suggestions
+        if(config.mode === 'chat') showSuggestions();
+    }
+
+    function setMode(mode) {
+        config.mode = mode;
+        
+        // Update Tabs
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${mode}`).classList.add('active');
+
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML = ''; // Clear chat on mode switch for clarity
+
+        if (mode === 'chat') {
+            addBotMessage(strings[config.lang].welcome);
+            showSuggestions();
+        } else if (mode === 'quiz') {
+            startQuiz();
+        } else if (mode === 'learn') {
+            addBotMessage(strings[config.lang].responses[Object.keys(strings[config.lang].responses)[0]]); // Just a sample
+            // Detailed learn mode implementation ...
+            showSuggestions();
+        }
+    }
+
+    // --- Chat Logic ---
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') handleSend();
+    }
+
+    function handleSend() {
+        const input = document.getElementById("user-input");
+        const text = input.value.trim();
+        if (!text) return;
+
+        addUserMessage(text);
+        input.value = '';
+
+        if(config.mode === 'chat') {
+            processChat(text);
+        } else {
+            // In quiz mode, text input might not be the primary interaction, but we handle it anyway
+            addBotMessage(strings[config.lang].unknown);
+        }
+    }
+
+    function addUserMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'chat-message user-message';
+        div.innerText = text;
+        appendMessage(div);
+    }
+
+    function addBotMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'chat-message bot-message';
+        div.innerHTML = text; // Allow HTML for bolding/formatting
+        appendMessage(div);
+    }
+
+    function appendMessage(element) {
+        const box = document.getElementById("chat-box");
+        box.appendChild(element);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function processChat(input) {
+        input = input.toLowerCase();
+        const responses = strings[config.lang].responses;
+        let response = strings[config.lang].unknown;
+
+        for (const key in responses) {
+            if (input.includes(key) || input.includes(key.toLowerCase())) {
+                response = responses[key];
+                break;
+            }
+        }
+        
+        // Simulate typing delay
+        setTimeout(() => addBotMessage(response), 600);
+    }
+
+    function showSuggestions() {
+        const subjects = strings[config.lang].subjects;
+        const div = document.createElement('div');
+        div.className = 'options-grid';
+        div.style.justifyContent = config.lang === 'ar' ? 'flex-start' : 'flex-end'; // Align based on lang
+        
+        // Center alignment looks better usually
+        div.style.justifyContent = 'center';
+        div.style.marginBottom = '15px';
+
+        subjects.forEach(sub => {
+            const btn = document.createElement('button');
+            btn.className = 'option-pill';
+            btn.innerText = sub;
+            btn.onclick = () => {
+                addUserMessage(sub);
+                processChat(sub);
+            };
+            div.appendChild(btn);
+        });
+        
+        document.getElementById("chat-box").appendChild(div);
+    }
+
+    // --- Quiz Logic ---
+    function startQuiz() {
+        currentQuizIndex = 0;
+        quizScore = 0;
+        addBotMessage(strings[config.lang].quizStart);
+        showNextQuestion();
+    }
+
+    function showNextQuestion() {
+        const questions = strings[config.lang].quizQuestions;
+        if (currentQuizIndex >= questions.length) {
+            finishQuiz();
+            return;
+        }
+
+        const q = questions[currentQuizIndex];
+        const qContainer = document.createElement('div');
+        qContainer.className = 'chat-message bot-message';
+        qContainer.style.width = '80%';
+        
+        let html = `<div class="quiz-card">
+            <div style="font-weight:bold; margin-bottom:10px;">${q.q}</div>
+            <div class="quiz-options">`;
+        
+        q.options.forEach((opt, idx) => {
+            html += `<button onclick="handleAnswer(${idx})">${opt}</button>`;
+        });
+
+        html += `</div></div>`;
+        qContainer.innerHTML = html;
+        appendMessage(qContainer);
+    }
+
+    window.handleAnswer = function(selectedIdx) {
+        const questions = strings[config.lang].quizQuestions;
+        const q = questions[currentQuizIndex];
+        
+        const isCorrect = selectedIdx === q.correct;
+        if (isCorrect) quizScore++;
+
+        const fb = isCorrect ? strings[config.lang].quizResult.correct : strings[config.lang].quizResult.wrong;
+        // User selection feedback (visual only, we don't add user msg for clicks usually in simple quizzes, but let's do modal style)
+        // Actually, let's just show bot feedback
+        
+        addBotMessage(fb);
+        
+        currentQuizIndex++;
+        setTimeout(showNextQuestion, 1000);
+    }
+
+    function finishQuiz() {
+        const total = strings[config.lang].quizQuestions.length;
+        addBotMessage(`${strings[config.lang].quizResult.score} ${quizScore} / ${total}`);
+        
+        // Reset to chat or show restart button
+        const restartBtn = document.createElement('button');
+        restartBtn.className = 'option-pill';
+        restartBtn.innerText = "🔄 " + (config.lang === 'ar' ? "إعادة الاختبار" : "Restart Quiz");
+        restartBtn.style.margin = "10px auto";
+        restartBtn.style.display = "block";
+        restartBtn.onclick = startQuiz;
+        appendMessage(restartBtn);
+    }
+
+</script>
+
+</body>
+</html>
